@@ -67,57 +67,60 @@ function App() {
   };
 
   return (
-    <div>
-      <ScenarioSelector
-        scenarios={scenarios}
-        selectedScenarioId={selectedScenarioId}
-        onScenarioChange={setSelectedScenarioId}
-      />
-      <h1>{scenario.scenario}</h1>
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        <div style={{ flex: 1 }}>
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'Arial, sans-serif' }}>
+      <header style={{ padding: '10px', backgroundColor: '#f0f0f0', borderBottom: '1px solid #ccc' }}>
+        <ScenarioSelector
+          scenarios={scenarios}
+          selectedScenarioId={selectedScenarioId}
+          onScenarioChange={setSelectedScenarioId}
+        />
+        <h1 style={{ margin: '5px 0', fontSize: '1.5em' }}>{scenario.scenario}</h1>
+        <div style={{ marginBottom: '10px' }}>
+          <button onClick={() => setPlaying(!playing)} style={{ marginRight: '10px', padding: '5px 10px' }}>{playing ? 'Pause' : 'Play'}</button>
+          <label htmlFor="speed-select" style={{ marginRight: '5px' }}>Speed:</label>
+          <select id="speed-select" value={speed} onChange={(e) => setSpeed(parseFloat(e.target.value))} style={{ marginRight: '20px' }}>
+            <option value={0.25}>0.25x</option>
+            <option value={0.5}>0.5x</option>
+            <option value={1}>1x</option>
+            <option value={2}>2x</option>
+            <option value={4}>4x</option>
+          </select>
+          <label htmlFor="time-scrub" style={{ marginRight: '5px' }}>Time: {scenario.time[currentTimeIndex]?.toFixed(2)}</label>
+          <input
+            id="time-scrub"
+            type="range"
+            min={0}
+            max={scenario.time.length - 1}
+            value={currentTimeIndex}
+            onChange={(e) => {
+              setCurrentTimeIndex(parseInt(e.target.value))
+              setPlaying(false) // Pause when scrubbing
+            }}
+            style={{ width: '200px' }}
+          />
+        </div>
+        <div style={{ fontSize: '0.9em', color: '#666' }}>
+          <strong>Tip:</strong> Use the time scrubber to explore the trajectory. Z (red) often crosses its threshold first, signaling ejection early.
+        </div>
+      </header>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ flex: 1, minHeight: 0 }}>
           <SpatialView scenario={scenario} currentTimeIndex={currentTimeIndex} />
         </div>
-       <div style={{ flex: 1 }}>
-           <DiagnosticsPanel scenario={scenario} currentTimeIndex={currentTimeIndex} />
-         </div>
-       </div>
-       <DefinitionsPanel />
-       <div className="card">
-        <p>
-          In this scenario, ejection occurs at t = {scenario.ejectionTime}.<br />
+        <div style={{ flex: 1, minHeight: 0 }}>
+          <DiagnosticsPanel scenario={scenario} currentTimeIndex={currentTimeIndex} />
+        </div>
+      </main>
+      <footer style={{ padding: '10px', backgroundColor: '#f9f9f9', borderTop: '1px solid #ccc', fontSize: '0.9em' }}>
+        <div style={{ marginBottom: '10px' }}>
+          <strong>Lead Times:</strong> In this scenario, ejection occurs at t = {scenario.ejectionTime}.<br />
           Z crosses its threshold at t = {scenario.firstCrossingTimes.Z} ({leadTimes.Z}% lead),<br />
           dI/dt at t = {scenario.firstCrossingTimes.dIdt} ({leadTimes.dIdt}% lead),<br />
           D_min at t = {scenario.firstCrossingTimes.Dmin} ({leadTimes.Dmin}% lead),<br />
           V_max at t = {scenario.firstCrossingTimes.Vmax} ({leadTimes.Vmax}% lead).
-        </p>
-        <p>Masses: {scenario.masses.join(', ')}</p>
-        <p>Placeholder: {scenario.placeholder ? 'Yes' : 'No'}</p>
-         <div>
-           <button onClick={() => setPlaying(!playing)}>{playing ? 'Pause' : 'Play'}</button>
-           <label htmlFor="speed-select">Speed:</label>
-           <select id="speed-select" value={speed} onChange={(e) => setSpeed(parseFloat(e.target.value))}>
-             <option value={0.25}>0.25x</option>
-             <option value={0.5}>0.5x</option>
-             <option value={1}>1x</option>
-             <option value={2}>2x</option>
-             <option value={4}>4x</option>
-           </select>
-           <label htmlFor="time-scrub">Time: {scenario.time[currentTimeIndex]?.toFixed(2)}</label>
-           <input
-             id="time-scrub"
-             type="range"
-             min={0}
-             max={scenario.time.length - 1}
-             value={currentTimeIndex}
-             onChange={(e) => {
-               setCurrentTimeIndex(parseInt(e.target.value))
-               setPlaying(false) // Pause when scrubbing
-             }}
-           />
-         </div>
-        <p>Current time index: {currentTimeIndex}</p>
-      </div>
+        </div>
+        <DefinitionsPanel />
+      </footer>
     </div>
   )
 }
