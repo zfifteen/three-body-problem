@@ -20,4 +20,9 @@ export const scenarios: ScenarioOption[] = [
     name: 'Equal-mass chaotic ejecting system (1:1:1) - Short',
     file: 'scenario-1-1-1.json',
   },
+  {
+    id: 'long-lived-hierarchical',
+    name: 'Long-lived hierarchical control (non-ejecting)',
+    file: 'long-lived-hierarchical.json',
+  },
 ];

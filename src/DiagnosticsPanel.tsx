@@ -1,5 +1,6 @@
 import Plot from 'react-plotly.js';
 import { ScenarioData } from './types';
+import Plotly from 'plotly.js';
 
 interface DiagnosticsPanelProps {
   scenario: ScenarioData;
