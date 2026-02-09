@@ -16,6 +16,13 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
 
   const currentTime = time[currentTimeIndex];
 
+  const leadTimes = {
+    Z: ((scenario.ejectionTime - scenario.firstCrossingTimes.Z) / scenario.ejectionTime * 100).toFixed(1),
+    dIdt: ((scenario.ejectionTime - scenario.firstCrossingTimes.dIdt) / scenario.ejectionTime * 100).toFixed(1),
+    Dmin: ((scenario.ejectionTime - scenario.firstCrossingTimes.Dmin) / scenario.ejectionTime * 100).toFixed(1),
+    Vmax: ((scenario.ejectionTime - scenario.firstCrossingTimes.Vmax) / scenario.ejectionTime * 100).toFixed(1),
+  };
+
   const data: Plotly.Data[] = [
     {
       x: time,
@@ -57,7 +64,7 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       mode: 'markers',
       name: 'Z crossing',
       marker: { color: 'red', symbol: 'star', size: 10 },
-      hovertemplate: `Z first crosses at t=${scenario.firstCrossingTimes.Z.toFixed(2)}<br>Threshold: ${scenario.thresholds.Z.toFixed(2)}<extra></extra>`,
+      hovertemplate: `Z first crosses at t=${scenario.firstCrossingTimes.Z.toFixed(2)}<br>Threshold: ${scenario.thresholds.Z.toFixed(2)}<br>Lead time: ${leadTimes.Z}%<extra></extra>`,
     },
     {
       x: [scenario.firstCrossingTimes.dIdt],
@@ -66,7 +73,7 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       mode: 'markers',
       name: 'dI/dt crossing',
       marker: { color: 'blue', symbol: 'diamond', size: 10 },
-      hovertemplate: `dI/dt first crosses at t=${scenario.firstCrossingTimes.dIdt.toFixed(2)}<br>Threshold: ${scenario.thresholds.dIdt.toFixed(2)}<extra></extra>`,
+      hovertemplate: `dI/dt first crosses at t=${scenario.firstCrossingTimes.dIdt.toFixed(2)}<br>Threshold: ${scenario.thresholds.dIdt.toFixed(2)}<br>Lead time: ${leadTimes.dIdt}%<extra></extra>`,
     },
     {
       x: [scenario.firstCrossingTimes.Dmin],
@@ -75,7 +82,7 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       mode: 'markers',
       name: 'D_min crossing',
       marker: { color: 'green', symbol: 'triangle-up', size: 10 },
-      hovertemplate: `D_min first crosses at t=${scenario.firstCrossingTimes.Dmin.toFixed(2)}<br>Threshold: ${scenario.thresholds.Dmin.toFixed(2)}<extra></extra>`,
+      hovertemplate: `D_min first crosses at t=${scenario.firstCrossingTimes.Dmin.toFixed(2)}<br>Threshold: ${scenario.thresholds.Dmin.toFixed(2)}<br>Lead time: ${leadTimes.Dmin}%<extra></extra>`,
     },
     {
       x: [scenario.firstCrossingTimes.Vmax],
@@ -84,7 +91,7 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       mode: 'markers',
       name: 'V_max crossing',
       marker: { color: 'orange', symbol: 'square', size: 10 },
-      hovertemplate: `V_max first crosses at t=${scenario.firstCrossingTimes.Vmax.toFixed(2)}<br>Threshold: ${scenario.thresholds.Vmax.toFixed(2)}<extra></extra>`,
+      hovertemplate: `V_max first crosses at t=${scenario.firstCrossingTimes.Vmax.toFixed(2)}<br>Threshold: ${scenario.thresholds.Vmax.toFixed(2)}<br>Lead time: ${leadTimes.Vmax}%<extra></extra>`,
     },
   ];
 
