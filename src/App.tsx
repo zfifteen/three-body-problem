@@ -51,9 +51,17 @@ function App() {
           <p>Masses: {scenario.masses.join(', ')}</p>
           <p>Ejection time: {scenario.ejectionTime}</p>
           <p>Placeholder: {scenario.placeholder ? 'Yes' : 'No'}</p>
-          <button onClick={() => setCurrentTimeIndex((prev) => Math.min(prev + 1, scenario.time.length - 1))}>
-            Next Time Step
-          </button>
+          <div>
+            <label htmlFor="time-scrub">Time: {scenario.time[currentTimeIndex]?.toFixed(2)}</label>
+            <input
+              id="time-scrub"
+              type="range"
+              min={0}
+              max={scenario.time.length - 1}
+              value={currentTimeIndex}
+              onChange={(e) => setCurrentTimeIndex(parseInt(e.target.value))}
+            />
+          </div>
           <p>Current time index: {currentTimeIndex}</p>
         </div>
       </div>
