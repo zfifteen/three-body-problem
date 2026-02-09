@@ -35,11 +35,11 @@ export function DefinitionsPanel() {
   ]
 
   return (
-    <div style={{ marginTop: '20px', padding: '10px', border: '1px solid #ccc', backgroundColor: '#f9f9f9' }}>
+    <div className="definitions-panel">
       <h3>Definitions</h3>
-      <div className="definitions-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '10px' }}>
+      <div className="definitions-grid">
         {definitions.map((def, index) => (
-          <div key={index} title={def.explanation} style={{ padding: '5px', border: '1px solid #ddd' }}>
+          <div key={index} className="definition-item" title={def.explanation}>
             <strong>{def.symbol}</strong>: {def.formula}
           </div>
         ))}

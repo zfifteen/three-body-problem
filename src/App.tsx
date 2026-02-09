@@ -68,17 +68,17 @@ function App() {
   };
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'Arial, sans-serif' }}>
-      <header className="app-header" style={{ padding: '10px', backgroundColor: '#f0f0f0', borderBottom: '1px solid #ccc' }}>
+    <div className="app-container">
+      <header className="app-header">
         <ScenarioSelector
           scenarios={scenarios}
           selectedScenarioId={selectedScenarioId}
           onScenarioChange={setSelectedScenarioId}
         />
-        <h1 className="app-title" style={{ margin: '5px 0', fontSize: '1.5em' }}>{scenario.scenario}</h1>
-        <div className="app-controls" style={{ marginBottom: '10px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' }}>
-          <button onClick={() => setPlaying(!playing)} style={{ padding: '5px 10px' }}>{playing ? 'Pause' : 'Play'}</button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+        <h1 className="app-title">{scenario.scenario}</h1>
+        <div className="app-controls">
+          <button onClick={() => setPlaying(!playing)}>{playing ? 'Pause' : 'Play'}</button>
+          <div>
             <label htmlFor="speed-select">Speed:</label>
             <select id="speed-select" value={speed} onChange={(e) => setSpeed(parseFloat(e.target.value))}>
               <option value={0.25}>0.25x</option>
@@ -88,8 +88,8 @@ function App() {
               <option value={4}>4x</option>
             </select>
           </div>
-          <div className="app-time-control" style={{ display: 'flex', alignItems: 'center', gap: '5px', flex: 1 }}>
-            <label htmlFor="time-scrub" style={{ whiteSpace: 'nowrap' }}>Time: {scenario.time[currentTimeIndex]?.toFixed(2)}</label>
+          <div className="app-time-control">
+            <label htmlFor="time-scrub">Time: {scenario.time[currentTimeIndex]?.toFixed(2)}</label>
             <input
               id="time-scrub"
               type="range"
@@ -100,28 +100,27 @@ function App() {
                 setCurrentTimeIndex(parseInt(e.target.value))
                 setPlaying(false) // Pause when scrubbing
               }}
-              style={{ flex: 1, minWidth: '100px' }}
             />
           </div>
         </div>
-        <div className="app-tip" style={{ fontSize: '0.9em', color: '#666' }}>
+        <div className="app-tip">
           <strong>Tip:</strong> Use the time scrubber to explore the trajectory. Z (red) often crosses its threshold first, signaling ejection early.
         </div>
       </header>
-      <main className="app-main" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <div className="app-spatial-view" style={{ flex: 1, minHeight: 0 }}>
+      <main className="app-main">
+        <div className="app-spatial-view">
           <Suspense fallback={<div>Loading 3D view...</div>}>
             <SpatialView scenario={scenario} currentTimeIndex={currentTimeIndex} />
           </Suspense>
         </div>
-        <div className="app-diagnostics-panel" style={{ flex: 1, minHeight: 0 }}>
+        <div className="app-diagnostics-panel">
           <Suspense fallback={<div>Loading diagnostics...</div>}>
             <DiagnosticsPanel scenario={scenario} currentTimeIndex={currentTimeIndex} />
           </Suspense>
         </div>
       </main>
-      <footer className="app-footer" style={{ padding: '10px', backgroundColor: '#f9f9f9', borderTop: '1px solid #ccc', fontSize: '0.9em' }}>
-        <div style={{ marginBottom: '10px' }}>
+      <footer className="app-footer">
+        <div className="lead-times">
           <strong>Lead Times:</strong> In this scenario, ejection occurs at t = {scenario.ejectionTime}.<br />
           Z crosses its threshold at t = {scenario.firstCrossingTimes.Z} ({leadTimes.Z}% lead),<br />
           dI/dt at t = {scenario.firstCrossingTimes.dIdt} ({leadTimes.dIdt}% lead),<br />
