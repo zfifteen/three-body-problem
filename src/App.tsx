@@ -4,6 +4,7 @@ import { ScenarioData } from './types'
 import { SpatialView } from './SpatialView'
 import { ScenarioSelector } from './ScenarioSelector'
 import { DiagnosticsPanel } from './DiagnosticsPanel'
+import { DefinitionsPanel } from './DefinitionsPanel'
 import { scenarios } from './scenarios'
 
 function App() {
@@ -76,11 +77,12 @@ function App() {
         <div style={{ flex: 1 }}>
           <SpatialView scenario={scenario} currentTimeIndex={currentTimeIndex} />
         </div>
-        <div style={{ flex: 1 }}>
-          <DiagnosticsPanel scenario={scenario} currentTimeIndex={currentTimeIndex} />
-        </div>
-      </div>
-      <div className="card">
+       <div style={{ flex: 1 }}>
+           <DiagnosticsPanel scenario={scenario} currentTimeIndex={currentTimeIndex} />
+         </div>
+       </div>
+       <DefinitionsPanel />
+       <div className="card">
         <p>
           In this scenario, ejection occurs at t = {scenario.ejectionTime}.<br />
           Z crosses its threshold at t = {scenario.firstCrossingTimes.Z} ({leadTimes.Z}% lead),<br />
