@@ -11,6 +11,7 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [currentTimeIndex, setCurrentTimeIndex] = useState(0)
   const [selectedScenarioId, setSelectedScenarioId] = useState('equal-mass-ejecting')
+  const [playing, setPlaying] = useState(false)
 
   useEffect(() => {
     const selectedScenario = scenarios.find(s => s.id === selectedScenarioId)
@@ -23,12 +24,30 @@ function App() {
         setScenario(data)
         setLoading(false)
         setCurrentTimeIndex(0) // Reset time index when changing scenario
+        setPlaying(false) // Stop playing when changing scenario
       })
       .catch(error => {
         console.error('Error loading scenario:', error)
         setLoading(false)
       })
   }, [selectedScenarioId])
+
+  useEffect(() => {
+    if (!playing || !scenario) return
+
+    const interval = setInterval(() => {
+      setCurrentTimeIndex((prev) => {
+        const next = prev + 1
+        if (next >= scenario.time.length) {
+          setPlaying(false)
+          return prev
+        }
+        return next
+      })
+    }, 100) // Adjust speed as needed
+
+    return () => clearInterval(interval)
+  }, [playing, scenario])
 
   if (loading) {
     return <div>Loading scenario...</div>
@@ -72,6 +91,7 @@ function App() {
         <p>Masses: {scenario.masses.join(', ')}</p>
         <p>Placeholder: {scenario.placeholder ? 'Yes' : 'No'}</p>
         <div>
+          <button onClick={() => setPlaying(!playing)}>{playing ? 'Pause' : 'Play'}</button>
           <label htmlFor="time-scrub">Time: {scenario.time[currentTimeIndex]?.toFixed(2)}</label>
           <input
             id="time-scrub"
@@ -79,7 +99,10 @@ function App() {
             min={0}
             max={scenario.time.length - 1}
             value={currentTimeIndex}
-            onChange={(e) => setCurrentTimeIndex(parseInt(e.target.value))}
+            onChange={(e) => {
+              setCurrentTimeIndex(parseInt(e.target.value))
+              setPlaying(false) // Pause when scrubbing
+            }}
           />
         </div>
         <p>Current time index: {currentTimeIndex}</p>
