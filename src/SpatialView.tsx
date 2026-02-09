@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { ScenarioData } from './types'
@@ -6,12 +6,10 @@ import { ScenarioData } from './types'
 interface SpatialViewProps {
   scenario: ScenarioData
   currentTimeIndex: number
+  viewMode: 'physical' | 'triangle'
 }
 
-type ViewMode = 'physical' | 'triangle'
-
-export function SpatialView({ scenario, currentTimeIndex }: SpatialViewProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('physical')
+export function SpatialView({ scenario, currentTimeIndex, viewMode, setViewMode }: SpatialViewProps) {
   const mountRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<THREE.Scene | null>(null)
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
@@ -134,11 +132,6 @@ export function SpatialView({ scenario, currentTimeIndex }: SpatialViewProps) {
       <div ref={mountRef} style={{ width: '100%', height: '100%' }} />
       <div style={{ position: 'absolute', top: 10, left: 10, color: 'white', background: 'rgba(0,0,0,0.5)', padding: '5px' }}>
         t = {scenario.time[currentTimeIndex]?.toFixed(2)}
-      </div>
-      <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.5)', padding: '5px' }}>
-        <button onClick={() => setViewMode(viewMode === 'physical' ? 'triangle' : 'physical')} style={{ color: 'white', background: 'transparent', border: '1px solid white', padding: '2px 5px' }}>
-          {viewMode === 'physical' ? 'Physical' : 'Triangle'}
-        </button>
       </div>
     </div>
   )

@@ -29,14 +29,15 @@ const DiagnosticsPanel = lazy(() => import('./DiagnosticsPanel').then(module => 
 function App() {
   const [scenario, setScenario] = useState<ScenarioData | null>(null)
   const [loading, setLoading] = useState(true)
-    const [currentTimeIndex, setCurrentTimeIndex] = useState(0)
-    const [selectedScenarioId, setSelectedScenarioId] = useState('equal-mass-ejecting')
-    const [playing, setPlaying] = useState(false)
-    const [speed, setSpeed] = useState(1)
-    const [showOnboarding, setShowOnboarding] = useState(() => {
-      const hasSeen = localStorage.getItem('hasSeenOnboarding')
-      return !hasSeen
-    })
+     const [currentTimeIndex, setCurrentTimeIndex] = useState(0)
+     const [selectedScenarioId, setSelectedScenarioId] = useState('equal-mass-ejecting')
+     const [playing, setPlaying] = useState(false)
+     const [speed, setSpeed] = useState(1)
+     const [viewMode, setViewMode] = useState<'physical' | 'triangle'>('physical')
+     const [showOnboarding, setShowOnboarding] = useState(() => {
+       const hasSeen = localStorage.getItem('hasSeenOnboarding')
+       return !hasSeen
+     })
 
   useEffect(() => {
     const selectedScenario = scenarios.find(s => s.id === selectedScenarioId)
@@ -105,17 +106,24 @@ function App() {
         />
         <h1 className="app-title">{scenario.scenario}</h1>
         <div className="app-controls">
-          <button onClick={() => setPlaying(!playing)}>{playing ? 'Pause' : 'Play'}</button>
-          <div>
-            <label htmlFor="speed-select">Speed:</label>
-            <select id="speed-select" value={speed} onChange={(e) => setSpeed(parseFloat(e.target.value))}>
-              <option value={0.25}>0.25x</option>
-              <option value={0.5}>0.5x</option>
-              <option value={1}>1x</option>
-              <option value={2}>2x</option>
-              <option value={4}>4x</option>
-            </select>
-          </div>
+           <button onClick={() => setPlaying(!playing)}>{playing ? 'Pause' : 'Play'}</button>
+           <div>
+             <label htmlFor="speed-select">Speed:</label>
+             <select id="speed-select" value={speed} onChange={(e) => setSpeed(parseFloat(e.target.value))}>
+               <option value={0.25}>0.25x</option>
+               <option value={0.5}>0.5x</option>
+               <option value={1}>1x</option>
+               <option value={2}>2x</option>
+               <option value={4}>4x</option>
+             </select>
+           </div>
+           <div>
+             <label htmlFor="view-mode-select">View:</label>
+             <select id="view-mode-select" value={viewMode} onChange={(e) => setViewMode(e.target.value as 'physical' | 'triangle')}>
+               <option value="physical">Physical</option>
+               <option value="triangle">Triangle</option>
+             </select>
+           </div>
           <div className="app-time-control">
             <label htmlFor="time-scrub">Time: {scenario.time[currentTimeIndex]?.toFixed(2)}</label>
             <input
@@ -137,10 +145,10 @@ function App() {
       </header>
       <main className="app-main">
         <div className="app-spatial-view">
-          <Suspense fallback={<div>Loading 3D view...</div>}>
-            <SpatialView scenario={scenario} currentTimeIndex={currentTimeIndex} />
-          </Suspense>
-        </div>
+           <Suspense fallback={<div>Loading 3D view...</div>}>
+             <SpatialView scenario={scenario} currentTimeIndex={currentTimeIndex} viewMode={viewMode} setViewMode={setViewMode} />
+           </Suspense>
+         </div>
         <div className="app-diagnostics-panel">
           <Suspense fallback={<div>Loading diagnostics...</div>}>
             <DiagnosticsPanel scenario={scenario} currentTimeIndex={currentTimeIndex} />
