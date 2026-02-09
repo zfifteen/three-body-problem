@@ -3,6 +3,7 @@ import './App.css'
 import { ScenarioData } from './types'
 import { SpatialView } from './SpatialView'
 import { ScenarioSelector } from './ScenarioSelector'
+import { DiagnosticsPanel } from './DiagnosticsPanel'
 import { scenarios } from './scenarios'
 
 function App() {
@@ -38,34 +39,39 @@ function App() {
   }
 
   return (
-    <>
-      <div>
-        <ScenarioSelector
-          scenarios={scenarios}
-          selectedScenarioId={selectedScenarioId}
-          onScenarioChange={setSelectedScenarioId}
-        />
-        <h1>{scenario.scenario}</h1>
-        <SpatialView scenario={scenario} currentTimeIndex={currentTimeIndex} />
-        <div className="card">
-          <p>Masses: {scenario.masses.join(', ')}</p>
-          <p>Ejection time: {scenario.ejectionTime}</p>
-          <p>Placeholder: {scenario.placeholder ? 'Yes' : 'No'}</p>
-          <div>
-            <label htmlFor="time-scrub">Time: {scenario.time[currentTimeIndex]?.toFixed(2)}</label>
-            <input
-              id="time-scrub"
-              type="range"
-              min={0}
-              max={scenario.time.length - 1}
-              value={currentTimeIndex}
-              onChange={(e) => setCurrentTimeIndex(parseInt(e.target.value))}
-            />
-          </div>
-          <p>Current time index: {currentTimeIndex}</p>
+    <div>
+      <ScenarioSelector
+        scenarios={scenarios}
+        selectedScenarioId={selectedScenarioId}
+        onScenarioChange={setSelectedScenarioId}
+      />
+      <h1>{scenario.scenario}</h1>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+        <div style={{ flex: 1 }}>
+          <SpatialView scenario={scenario} currentTimeIndex={currentTimeIndex} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <DiagnosticsPanel scenario={scenario} currentTimeIndex={currentTimeIndex} />
         </div>
       </div>
-    </>
+      <div className="card">
+        <p>Masses: {scenario.masses.join(', ')}</p>
+        <p>Ejection time: {scenario.ejectionTime}</p>
+        <p>Placeholder: {scenario.placeholder ? 'Yes' : 'No'}</p>
+        <div>
+          <label htmlFor="time-scrub">Time: {scenario.time[currentTimeIndex]?.toFixed(2)}</label>
+          <input
+            id="time-scrub"
+            type="range"
+            min={0}
+            max={scenario.time.length - 1}
+            value={currentTimeIndex}
+            onChange={(e) => setCurrentTimeIndex(parseInt(e.target.value))}
+          />
+        </div>
+        <p>Current time index: {currentTimeIndex}</p>
+      </div>
+    </div>
   )
 }
 
