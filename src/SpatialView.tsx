@@ -9,7 +9,7 @@ interface SpatialViewProps {
   viewMode: 'physical' | 'triangle'
 }
 
-export function SpatialView({ scenario, currentTimeIndex, viewMode, setViewMode }: SpatialViewProps) {
+export function SpatialView({ scenario, currentTimeIndex, viewMode }: SpatialViewProps) {
   const mountRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<THREE.Scene | null>(null)
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
@@ -120,7 +120,7 @@ export function SpatialView({ scenario, currentTimeIndex, viewMode, setViewMode 
 
     return () => {
       // Cleanup on unmount
-      if (rendererRef.current && mountRef.current) {
+      if (rendererRef.current && mountRef.current && mountRef.current.contains(rendererRef.current.domElement)) {
         mountRef.current.removeChild(rendererRef.current.domElement)
         rendererRef.current.dispose()
       }

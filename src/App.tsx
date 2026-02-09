@@ -145,9 +145,9 @@ function App() {
       </header>
       <main className="app-main">
         <div className="app-spatial-view">
-           <Suspense fallback={<div>Loading 3D view...</div>}>
-             <SpatialView scenario={scenario} currentTimeIndex={currentTimeIndex} viewMode={viewMode} setViewMode={setViewMode} />
-           </Suspense>
+            <Suspense fallback={<div>Loading 3D view...</div>}>
+              <SpatialView scenario={scenario} currentTimeIndex={currentTimeIndex} viewMode={viewMode} />
+            </Suspense>
          </div>
         <div className="app-diagnostics-panel">
           <Suspense fallback={<div>Loading diagnostics...</div>}>
