@@ -5,16 +5,38 @@ import { ScenarioSelector } from './ScenarioSelector'
 import { DefinitionsPanel } from './DefinitionsPanel'
 import { scenarios } from './scenarios'
 
+function OnboardingModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <h2>Welcome to the Three-Body Problem Visualizer</h2>
+        <p>This app demonstrates how the Z diagnostic provides early warnings for ejection events in three-body systems.</p>
+        <ul>
+          <li>Select a scenario from the dropdown.</li>
+          <li>Use the time scrubber to explore trajectories.</li>
+          <li>Watch Z (red curve) cross its threshold first.</li>
+          <li>Check lead times in the footer.</li>
+        </ul>
+        <button onClick={onClose}>Get Started</button>
+      </div>
+    </div>
+  )
+}
+
 const SpatialView = lazy(() => import('./SpatialView').then(module => ({ default: module.SpatialView })))
 const DiagnosticsPanel = lazy(() => import('./DiagnosticsPanel').then(module => ({ default: module.DiagnosticsPanel })))
 
 function App() {
   const [scenario, setScenario] = useState<ScenarioData | null>(null)
   const [loading, setLoading] = useState(true)
-   const [currentTimeIndex, setCurrentTimeIndex] = useState(0)
-   const [selectedScenarioId, setSelectedScenarioId] = useState('equal-mass-ejecting')
-   const [playing, setPlaying] = useState(false)
-   const [speed, setSpeed] = useState(1)
+    const [currentTimeIndex, setCurrentTimeIndex] = useState(0)
+    const [selectedScenarioId, setSelectedScenarioId] = useState('equal-mass-ejecting')
+    const [playing, setPlaying] = useState(false)
+    const [speed, setSpeed] = useState(1)
+    const [showOnboarding, setShowOnboarding] = useState(() => {
+      const hasSeen = localStorage.getItem('hasSeenOnboarding')
+      return !hasSeen
+    })
 
   useEffect(() => {
     const selectedScenario = scenarios.find(s => s.id === selectedScenarioId)
@@ -67,8 +89,14 @@ function App() {
     Vmax: ((scenario.ejectionTime - scenario.firstCrossingTimes.Vmax) / scenario.ejectionTime * 100).toFixed(1),
   };
 
+  const handleCloseOnboarding = () => {
+    setShowOnboarding(false)
+    localStorage.setItem('hasSeenOnboarding', 'true')
+  }
+
   return (
     <div className="app-container">
+      {showOnboarding && <OnboardingModal onClose={handleCloseOnboarding} />}
       <header className="app-header">
         <ScenarioSelector
           scenarios={scenarios}
