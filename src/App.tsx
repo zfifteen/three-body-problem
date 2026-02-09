@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import './App.css'
 import { ScenarioData } from './types'
-import { SpatialView } from './SpatialView'
 import { ScenarioSelector } from './ScenarioSelector'
-import { DiagnosticsPanel } from './DiagnosticsPanel'
 import { DefinitionsPanel } from './DefinitionsPanel'
 import { scenarios } from './scenarios'
+
+const SpatialView = lazy(() => import('./SpatialView').then(module => ({ default: module.SpatialView })))
+const DiagnosticsPanel = lazy(() => import('./DiagnosticsPanel').then(module => ({ default: module.DiagnosticsPanel })))
 
 function App() {
   const [scenario, setScenario] = useState<ScenarioData | null>(null)
@@ -109,10 +110,14 @@ function App() {
       </header>
       <main className="app-main" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <div className="app-spatial-view" style={{ flex: 1, minHeight: 0 }}>
-          <SpatialView scenario={scenario} currentTimeIndex={currentTimeIndex} />
+          <Suspense fallback={<div>Loading 3D view...</div>}>
+            <SpatialView scenario={scenario} currentTimeIndex={currentTimeIndex} />
+          </Suspense>
         </div>
         <div className="app-diagnostics-panel" style={{ flex: 1, minHeight: 0 }}>
-          <DiagnosticsPanel scenario={scenario} currentTimeIndex={currentTimeIndex} />
+          <Suspense fallback={<div>Loading diagnostics...</div>}>
+            <DiagnosticsPanel scenario={scenario} currentTimeIndex={currentTimeIndex} />
+          </Suspense>
         </div>
       </main>
       <footer className="app-footer" style={{ padding: '10px', backgroundColor: '#f9f9f9', borderTop: '1px solid #ccc', fontSize: '0.9em' }}>
