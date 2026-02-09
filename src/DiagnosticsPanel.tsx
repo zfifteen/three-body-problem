@@ -6,6 +6,8 @@ interface DiagnosticsPanelProps {
   currentTimeIndex: number;
 }
 
+type MetricKey = 'Z' | 'dIdt' | 'Dmin' | 'Vmax';
+
 export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPanelProps) {
   const time = scenario.time;
   const z = scenario.scalars.Z;
@@ -15,11 +17,18 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
 
   const currentTime = time[currentTimeIndex];
 
+  const calculateLead = (crossing: number | undefined): string => {
+    if (scenario.ejectionTime === null || crossing === undefined || scenario.ejectionTime === 0) {
+      return 'N/A';
+    }
+    return ((scenario.ejectionTime - crossing) / scenario.ejectionTime * 100).toFixed(1);
+  };
+
   const leadTimes = {
-    Z: ((scenario.ejectionTime - scenario.firstCrossingTimes.Z) / scenario.ejectionTime * 100).toFixed(1),
-    dIdt: ((scenario.ejectionTime - scenario.firstCrossingTimes.dIdt) / scenario.ejectionTime * 100).toFixed(1),
-    Dmin: ((scenario.ejectionTime - scenario.firstCrossingTimes.Dmin) / scenario.ejectionTime * 100).toFixed(1),
-    Vmax: ((scenario.ejectionTime - scenario.firstCrossingTimes.Vmax) / scenario.ejectionTime * 100).toFixed(1),
+    Z: calculateLead(scenario.firstCrossingTimes.Z),
+    dIdt: calculateLead(scenario.firstCrossingTimes.dIdt),
+    Dmin: calculateLead(scenario.firstCrossingTimes.Dmin),
+    Vmax: calculateLead(scenario.firstCrossingTimes.Vmax),
   };
 
   const data: Plotly.Data[] = [
@@ -63,52 +72,40 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       xaxis: 'x',
       yaxis: 'y4',
     },
-    // First crossing markers
-    {
-      x: [scenario.firstCrossingTimes.Z],
-      y: [scenario.thresholds.Z],
-      type: 'scatter',
-      mode: 'markers',
-      name: 'Z crossing',
-      marker: { color: 'red', symbol: 'star', size: 10 },
-      hovertemplate: `Z first crosses at t=${scenario.firstCrossingTimes.Z.toFixed(2)}<br>Threshold: ${scenario.thresholds.Z.toFixed(2)}<br>Lead time: ${leadTimes.Z}%<extra></extra>`,
-      xaxis: 'x',
-      yaxis: 'y',
-    },
-    {
-      x: [scenario.firstCrossingTimes.dIdt],
-      y: [scenario.thresholds.dIdt],
-      type: 'scatter',
-      mode: 'markers',
-      name: 'dI/dt crossing',
-      marker: { color: 'blue', symbol: 'diamond', size: 10 },
-      hovertemplate: `dI/dt first crosses at t=${scenario.firstCrossingTimes.dIdt.toFixed(2)}<br>Threshold: ${scenario.thresholds.dIdt.toFixed(2)}<br>Lead time: ${leadTimes.dIdt}%<extra></extra>`,
-      xaxis: 'x',
-      yaxis: 'y2',
-    },
-    {
-      x: [scenario.firstCrossingTimes.Dmin],
-      y: [scenario.thresholds.Dmin],
-      type: 'scatter',
-      mode: 'markers',
-      name: 'D_min crossing',
-      marker: { color: 'green', symbol: 'triangle-up', size: 10 },
-      hovertemplate: `D_min first crosses at t=${scenario.firstCrossingTimes.Dmin.toFixed(2)}<br>Threshold: ${scenario.thresholds.Dmin.toFixed(2)}<br>Lead time: ${leadTimes.Dmin}%<extra></extra>`,
-      xaxis: 'x',
-      yaxis: 'y3',
-    },
-    {
-      x: [scenario.firstCrossingTimes.Vmax],
-      y: [scenario.thresholds.Vmax],
-      type: 'scatter',
-      mode: 'markers',
-      name: 'V_max crossing',
-      marker: { color: 'orange', symbol: 'square', size: 10 },
-      hovertemplate: `V_max first crosses at t=${scenario.firstCrossingTimes.Vmax.toFixed(2)}<br>Threshold: ${scenario.thresholds.Vmax.toFixed(2)}<br>Lead time: ${leadTimes.Vmax}%<extra></extra>`,
-      xaxis: 'x',
-      yaxis: 'y4',
-    },
   ];
+
+  const crossingConfigs: Array<{
+    key: MetricKey;
+    name: string;
+    color: string;
+    symbol: string;
+    threshold: number;
+    yaxis: 'y' | 'y2' | 'y3' | 'y4';
+  }> = [
+    { key: 'Z', name: 'Z crossing', color: 'red', symbol: 'star', threshold: scenario.thresholds.Z, yaxis: 'y' as const },
+    { key: 'dIdt', name: 'dI/dt crossing', color: 'blue', symbol: 'diamond', threshold: scenario.thresholds.dIdt, yaxis: 'y2' as const },
+    { key: 'Dmin', name: 'D_min crossing', color: 'green', symbol: 'triangle-up', threshold: scenario.thresholds.Dmin, yaxis: 'y3' as const },
+    { key: 'Vmax', name: 'V_max crossing', color: 'orange', symbol: 'square', threshold: scenario.thresholds.Vmax, yaxis: 'y4' as const },
+  ];
+
+  crossingConfigs.forEach((config) => {
+    const crossingTime = scenario.firstCrossingTimes[config.key];
+    if (crossingTime === undefined) {
+      return;
+    }
+
+    data.push({
+      x: [crossingTime],
+      y: [config.threshold],
+      type: 'scatter',
+      mode: 'markers',
+      name: config.name,
+      marker: { color: config.color, symbol: config.symbol, size: 10 },
+      hovertemplate: `${config.name} at t=${crossingTime.toFixed(2)}<br>Threshold: ${config.threshold.toFixed(2)}<br>Lead time: ${leadTimes[config.key]}%<extra></extra>`,
+      xaxis: 'x',
+      yaxis: config.yaxis,
+    });
+  });
 
   const shapes: Partial<Plotly.Shape>[] = [
     // Vertical cursor
@@ -163,8 +160,10 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       xref: 'x',
       yref: 'y4',
     },
-    // Ejection line
-    {
+  ];
+
+  if (scenario.ejectionTime !== null) {
+    shapes.push({
       type: 'line',
       x0: scenario.ejectionTime,
       x1: scenario.ejectionTime,
@@ -173,8 +172,8 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       xref: 'x',
       yref: 'paper',
       line: { color: 'black', width: 3 },
-    },
-  ];
+    });
+  }
 
   const layout: Partial<Plotly.Layout> = {
     title: { text: 'Diagnostics' },
@@ -184,7 +183,7 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
     yaxis3: { title: { text: 'D_min' }, domain: [0.25, 0.5] },
     yaxis4: { title: { text: 'V_max' }, domain: [0, 0.25] },
     shapes,
-    annotations: [
+    annotations: scenario.ejectionTime !== null ? [
       {
         x: scenario.ejectionTime,
         y: 0.95,
@@ -194,7 +193,7 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
         showarrow: false,
         font: { color: 'black', size: 12 },
       },
-    ],
+    ] : [],
     height: 600,
     grid: {
       rows: 4,

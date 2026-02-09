@@ -43,5 +43,4 @@
     "Vmax": 1.0
   },
   "placeholder": true
-}</content>
-<parameter name="filePath">public/data/long-lived-hierarchical.json
+}

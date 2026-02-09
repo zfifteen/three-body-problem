@@ -29,23 +29,31 @@ const DiagnosticsPanel = lazy(() => import('./DiagnosticsPanel').then(module => 
 function App() {
   const [scenario, setScenario] = useState<ScenarioData | null>(null)
   const [loading, setLoading] = useState(true)
-     const [currentTimeIndex, setCurrentTimeIndex] = useState(0)
-     const [selectedScenarioId, setSelectedScenarioId] = useState('equal-mass-ejecting')
-     const [playing, setPlaying] = useState(false)
-     const [speed, setSpeed] = useState(1)
-     const [viewMode, setViewMode] = useState<'physical' | 'triangle'>('physical')
-     const [showOnboarding, setShowOnboarding] = useState(() => {
-       const hasSeen = localStorage.getItem('hasSeenOnboarding')
-       return !hasSeen
-     })
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [currentTimeIndex, setCurrentTimeIndex] = useState(0)
+  const [selectedScenarioId, setSelectedScenarioId] = useState('equal-mass-ejecting')
+  const [playing, setPlaying] = useState(false)
+  const [speed, setSpeed] = useState(1)
+  const [viewMode, setViewMode] = useState<'physical' | 'triangle'>('physical')
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    const hasSeen = localStorage.getItem('hasSeenOnboarding')
+    return !hasSeen
+  })
 
   useEffect(() => {
     const selectedScenario = scenarios.find(s => s.id === selectedScenarioId)
     if (!selectedScenario) return
 
     setLoading(true)
+    setLoadError(null)
+    setScenario(null)
     fetch(`/data/${selectedScenario.file}`)
-      .then(response => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`)
+        }
+        return response.json()
+      })
       .then((data: ScenarioData) => {
         setScenario(data)
         setLoading(false)
@@ -55,6 +63,7 @@ function App() {
       .catch(error => {
         console.error('Error loading scenario:', error)
         setLoading(false)
+        setLoadError(`Could not load ${selectedScenario.name}. Check the JSON bundle in public/data.`)
       })
   }, [selectedScenarioId])
 
@@ -79,16 +88,20 @@ function App() {
     return <div>Loading scenario...</div>
   }
 
+  if (loadError) {
+    return <div>{loadError}</div>
+  }
+
   if (!scenario) {
     return <div>Error loading scenario.</div>
   }
 
-  const leadTimes = {
-    Z: ((scenario.ejectionTime - scenario.firstCrossingTimes.Z) / scenario.ejectionTime * 100).toFixed(1),
-    dIdt: ((scenario.ejectionTime - scenario.firstCrossingTimes.dIdt) / scenario.ejectionTime * 100).toFixed(1),
-    Dmin: ((scenario.ejectionTime - scenario.firstCrossingTimes.Dmin) / scenario.ejectionTime * 100).toFixed(1),
-    Vmax: ((scenario.ejectionTime - scenario.firstCrossingTimes.Vmax) / scenario.ejectionTime * 100).toFixed(1),
-  };
+  const leadTimes = scenario.ejectionTime !== null ? {
+    Z: scenario.firstCrossingTimes.Z !== undefined ? ((scenario.ejectionTime - scenario.firstCrossingTimes.Z) / scenario.ejectionTime * 100).toFixed(1) : 'N/A',
+    dIdt: scenario.firstCrossingTimes.dIdt !== undefined ? ((scenario.ejectionTime - scenario.firstCrossingTimes.dIdt) / scenario.ejectionTime * 100).toFixed(1) : 'N/A',
+    Dmin: scenario.firstCrossingTimes.Dmin !== undefined ? ((scenario.ejectionTime - scenario.firstCrossingTimes.Dmin) / scenario.ejectionTime * 100).toFixed(1) : 'N/A',
+    Vmax: scenario.firstCrossingTimes.Vmax !== undefined ? ((scenario.ejectionTime - scenario.firstCrossingTimes.Vmax) / scenario.ejectionTime * 100).toFixed(1) : 'N/A',
+  } : { Z: 'N/A', dIdt: 'N/A', Dmin: 'N/A', Vmax: 'N/A' };
 
   const handleCloseOnboarding = () => {
     setShowOnboarding(false)
@@ -106,24 +119,24 @@ function App() {
         />
         <h1 className="app-title">{scenario.scenario}</h1>
         <div className="app-controls">
-           <button onClick={() => setPlaying(!playing)}>{playing ? 'Pause' : 'Play'}</button>
-           <div>
-             <label htmlFor="speed-select">Speed:</label>
-             <select id="speed-select" value={speed} onChange={(e) => setSpeed(parseFloat(e.target.value))}>
-               <option value={0.25}>0.25x</option>
-               <option value={0.5}>0.5x</option>
-               <option value={1}>1x</option>
-               <option value={2}>2x</option>
-               <option value={4}>4x</option>
-             </select>
-           </div>
-           <div>
-             <label htmlFor="view-mode-select">View:</label>
-             <select id="view-mode-select" value={viewMode} onChange={(e) => setViewMode(e.target.value as 'physical' | 'triangle')}>
-               <option value="physical">Physical</option>
-               <option value="triangle">Triangle</option>
-             </select>
-           </div>
+          <button onClick={() => setPlaying(!playing)}>{playing ? 'Pause' : 'Play'}</button>
+          <div>
+            <label htmlFor="speed-select">Speed:</label>
+            <select id="speed-select" value={speed} onChange={(e) => setSpeed(parseFloat(e.target.value))}>
+              <option value={0.25}>0.25x</option>
+              <option value={0.5}>0.5x</option>
+              <option value={1}>1x</option>
+              <option value={2}>2x</option>
+              <option value={4}>4x</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="view-mode-select">View:</label>
+            <select id="view-mode-select" value={viewMode} onChange={(e) => setViewMode(e.target.value as 'physical' | 'triangle')}>
+              <option value="physical">Physical</option>
+              <option value="triangle">Triangle</option>
+            </select>
+          </div>
           <div className="app-time-control">
             <label htmlFor="time-scrub">Time: {scenario.time[currentTimeIndex]?.toFixed(2)}</label>
             <input
@@ -157,11 +170,19 @@ function App() {
       </main>
       <footer className="app-footer">
         <div className="lead-times">
-          <strong>Lead Times:</strong> In this scenario, ejection occurs at t = {scenario.ejectionTime}.<br />
-          Z crosses its threshold at t = {scenario.firstCrossingTimes.Z} ({leadTimes.Z}% lead),<br />
-          dI/dt at t = {scenario.firstCrossingTimes.dIdt} ({leadTimes.dIdt}% lead),<br />
-          D_min at t = {scenario.firstCrossingTimes.Dmin} ({leadTimes.Dmin}% lead),<br />
-          V_max at t = {scenario.firstCrossingTimes.Vmax} ({leadTimes.Vmax}% lead).
+          {scenario.ejectionTime !== null ? (
+            <>
+              <strong>Lead Times:</strong> In this scenario, ejection occurs at t = {scenario.ejectionTime}.<br />
+              Z crosses its threshold at t = {scenario.firstCrossingTimes.Z ?? 'N/A'} ({leadTimes.Z}% lead),<br />
+              dI/dt at t = {scenario.firstCrossingTimes.dIdt ?? 'N/A'} ({leadTimes.dIdt}% lead),<br />
+              D_min at t = {scenario.firstCrossingTimes.Dmin ?? 'N/A'} ({leadTimes.Dmin}% lead),<br />
+              V_max at t = {scenario.firstCrossingTimes.Vmax ?? 'N/A'} ({leadTimes.Vmax}% lead).
+            </>
+          ) : (
+            <>
+              <strong>Lead Times:</strong> No ejection detected in this control scenario, threshold crossings are not expected.
+            </>
+          )}
         </div>
         <DefinitionsPanel />
       </footer>
