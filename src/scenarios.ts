@@ -16,6 +16,11 @@ export const scenarios: ScenarioOption[] = [
     file: 'moderate-hierarchy-ejecting.json',
   },
   {
+    id: 'extreme-hierarchy-ejecting',
+    name: 'Extreme hierarchy ejecting system (10:1:1)',
+    file: 'extreme-hierarchy-ejecting.json',
+  },
+  {
     id: 'scenario-1-1-1',
     name: 'Equal-mass chaotic ejecting system (1:1:1) - Short',
     file: 'scenario-1-1-1.json',
