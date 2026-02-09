@@ -38,6 +38,13 @@ function App() {
     return <div>Error loading scenario.</div>
   }
 
+  const leadTimes = {
+    Z: ((scenario.ejectionTime - scenario.firstCrossingTimes.Z) / scenario.ejectionTime * 100).toFixed(1),
+    dIdt: ((scenario.ejectionTime - scenario.firstCrossingTimes.dIdt) / scenario.ejectionTime * 100).toFixed(1),
+    Dmin: ((scenario.ejectionTime - scenario.firstCrossingTimes.Dmin) / scenario.ejectionTime * 100).toFixed(1),
+    Vmax: ((scenario.ejectionTime - scenario.firstCrossingTimes.Vmax) / scenario.ejectionTime * 100).toFixed(1),
+  };
+
   return (
     <div>
       <ScenarioSelector
@@ -55,8 +62,14 @@ function App() {
         </div>
       </div>
       <div className="card">
+        <p>
+          In this scenario, ejection occurs at t = {scenario.ejectionTime}.<br />
+          Z crosses its threshold at t = {scenario.firstCrossingTimes.Z} ({leadTimes.Z}% lead),<br />
+          dI/dt at t = {scenario.firstCrossingTimes.dIdt} ({leadTimes.dIdt}% lead),<br />
+          D_min at t = {scenario.firstCrossingTimes.Dmin} ({leadTimes.Dmin}% lead),<br />
+          V_max at t = {scenario.firstCrossingTimes.Vmax} ({leadTimes.Vmax}% lead).
+        </p>
         <p>Masses: {scenario.masses.join(', ')}</p>
-        <p>Ejection time: {scenario.ejectionTime}</p>
         <p>Placeholder: {scenario.placeholder ? 'Yes' : 'No'}</p>
         <div>
           <label htmlFor="time-scrub">Time: {scenario.time[currentTimeIndex]?.toFixed(2)}</label>
