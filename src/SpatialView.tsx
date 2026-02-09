@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { ScenarioData } from './types'
@@ -8,7 +8,10 @@ interface SpatialViewProps {
   currentTimeIndex: number
 }
 
+type ViewMode = 'physical' | 'triangle'
+
 export function SpatialView({ scenario, currentTimeIndex }: SpatialViewProps) {
+  const [viewMode, setViewMode] = useState<ViewMode>('physical')
   const mountRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<THREE.Scene | null>(null)
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
@@ -87,7 +90,14 @@ export function SpatialView({ scenario, currentTimeIndex }: SpatialViewProps) {
       for (let t = 0; t <= currentTimeIndex; t++) {
         const pos = scenario.positions[t]
         if (pos) {
-          trailPoints.push(new THREE.Vector3(pos[i][0], pos[i][1], pos[i][2]))
+          if (viewMode === 'physical') {
+            trailPoints.push(new THREE.Vector3(pos[i][0], pos[i][1], pos[i][2]))
+          } else if (viewMode === 'triangle') {
+            // Compute center of mass for each time step
+            const cm = pos.reduce((acc, p) => [acc[0] + p[0], acc[1] + p[1], acc[2] + p[2]], [0, 0, 0])
+            cm[0] /= 3; cm[1] /= 3; cm[2] /= 3
+            trailPoints.push(new THREE.Vector3(pos[i][0] - cm[0], pos[i][1] - cm[1], pos[i][2] - cm[2]))
+          }
         }
       }
       trails[i].geometry.setFromPoints(trailPoints)
@@ -96,9 +106,18 @@ export function SpatialView({ scenario, currentTimeIndex }: SpatialViewProps) {
     // Update positions
     const positions = scenario.positions[currentTimeIndex]
     if (positions && bodiesRef.current) {
-      bodiesRef.current.forEach((body, i) => {
-        body.position.set(positions[i][0], positions[i][1], positions[i][2])
-      })
+      if (viewMode === 'physical') {
+        bodiesRef.current.forEach((body, i) => {
+          body.position.set(positions[i][0], positions[i][1], positions[i][2])
+        })
+      } else if (viewMode === 'triangle') {
+        // Configuration space: center of mass at origin, show relative positions
+        const cm = positions.reduce((acc, pos) => [acc[0] + pos[0], acc[1] + pos[1], acc[2] + pos[2]], [0, 0, 0])
+        cm[0] /= 3; cm[1] /= 3; cm[2] /= 3
+        bodiesRef.current.forEach((body, i) => {
+          body.position.set(positions[i][0] - cm[0], positions[i][1] - cm[1], positions[i][2] - cm[2])
+        })
+      }
     }
 
     return () => {
@@ -108,13 +127,18 @@ export function SpatialView({ scenario, currentTimeIndex }: SpatialViewProps) {
         rendererRef.current.dispose()
       }
     }
-  }, [scenario, currentTimeIndex])
+  }, [scenario, currentTimeIndex, viewMode])
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <div ref={mountRef} style={{ width: '100%', height: '100%' }} />
       <div style={{ position: 'absolute', top: 10, left: 10, color: 'white', background: 'rgba(0,0,0,0.5)', padding: '5px' }}>
         t = {scenario.time[currentTimeIndex]?.toFixed(2)}
+      </div>
+      <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.5)', padding: '5px' }}>
+        <button onClick={() => setViewMode(viewMode === 'physical' ? 'triangle' : 'physical')} style={{ color: 'white', background: 'transparent', border: '1px solid white', padding: '2px 5px' }}>
+          {viewMode === 'physical' ? 'Physical' : 'Triangle'}
+        </button>
       </div>
     </div>
   )
