@@ -48,6 +48,39 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       name: 'V_max',
       line: { color: 'orange' },
     },
+    // First crossing markers
+    {
+      x: [scenario.firstCrossingTimes.Z],
+      y: [scenario.thresholds.Z],
+      type: 'scatter',
+      mode: 'markers',
+      name: 'Z crossing',
+      marker: { color: 'red', symbol: 'star', size: 10 },
+    },
+    {
+      x: [scenario.firstCrossingTimes.dIdt],
+      y: [scenario.thresholds.dIdt],
+      type: 'scatter',
+      mode: 'markers',
+      name: 'dI/dt crossing',
+      marker: { color: 'blue', symbol: 'diamond', size: 10 },
+    },
+    {
+      x: [scenario.firstCrossingTimes.Dmin],
+      y: [scenario.thresholds.Dmin],
+      type: 'scatter',
+      mode: 'markers',
+      name: 'D_min crossing',
+      marker: { color: 'green', symbol: 'triangle-up', size: 10 },
+    },
+    {
+      x: [scenario.firstCrossingTimes.Vmax],
+      y: [scenario.thresholds.Vmax],
+      type: 'scatter',
+      mode: 'markers',
+      name: 'V_max crossing',
+      marker: { color: 'orange', symbol: 'square', size: 10 },
+    },
   ];
 
   const shapes: Partial<Plotly.Shape>[] = [
