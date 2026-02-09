@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import Plot from 'react-plotly.js';
 import { ScenarioData } from './types';
 
 interface DiagnosticsPanelProps {
@@ -7,17 +7,6 @@ interface DiagnosticsPanelProps {
 }
 
 export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPanelProps) {
-  const [Plot, setPlot] = useState<any>(null);
-
-  useEffect(() => {
-    import('react-plotly.js').then(module => {
-      setPlot(() => module.default);
-    });
-  }, []);
-
-  if (!Plot) {
-    return <div>Loading plot...</div>;
-  }
   const time = scenario.time;
   const z = scenario.scalars.Z;
   const dIdt = scenario.scalars.dIdt;
