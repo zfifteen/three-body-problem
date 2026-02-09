@@ -40,3 +40,50 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Responsive styles for the three-body app */
+@media (max-width: 767px) {
+  .app-header {
+    padding: 5px !important;
+  }
+
+  .app-title {
+    font-size: 1.2em !important;
+  }
+
+  .app-controls {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 5px !important;
+  }
+
+  .app-time-control {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .app-tip {
+    font-size: 0.8em !important;
+  }
+
+  .app-main {
+    flex-direction: column;
+  }
+
+  .app-spatial-view {
+    flex: 2 !important;
+  }
+
+  .app-diagnostics-panel {
+    flex: 1 !important;
+  }
+
+  .app-footer {
+    padding: 5px !important;
+    font-size: 0.8em !important;
+  }
+
+  .definitions-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
