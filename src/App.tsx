@@ -10,9 +10,10 @@ import { scenarios } from './scenarios'
 function App() {
   const [scenario, setScenario] = useState<ScenarioData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [currentTimeIndex, setCurrentTimeIndex] = useState(0)
-  const [selectedScenarioId, setSelectedScenarioId] = useState('equal-mass-ejecting')
-  const [playing, setPlaying] = useState(false)
+   const [currentTimeIndex, setCurrentTimeIndex] = useState(0)
+   const [selectedScenarioId, setSelectedScenarioId] = useState('equal-mass-ejecting')
+   const [playing, setPlaying] = useState(false)
+   const [speed, setSpeed] = useState(1)
 
   useEffect(() => {
     const selectedScenario = scenarios.find(s => s.id === selectedScenarioId)
@@ -45,7 +46,7 @@ function App() {
         }
         return next
       })
-    }, 100) // Adjust speed as needed
+    }, 100 / speed) // Adjust speed as needed
 
     return () => clearInterval(interval)
   }, [playing, scenario])
@@ -92,21 +93,29 @@ function App() {
         </p>
         <p>Masses: {scenario.masses.join(', ')}</p>
         <p>Placeholder: {scenario.placeholder ? 'Yes' : 'No'}</p>
-        <div>
-          <button onClick={() => setPlaying(!playing)}>{playing ? 'Pause' : 'Play'}</button>
-          <label htmlFor="time-scrub">Time: {scenario.time[currentTimeIndex]?.toFixed(2)}</label>
-          <input
-            id="time-scrub"
-            type="range"
-            min={0}
-            max={scenario.time.length - 1}
-            value={currentTimeIndex}
-            onChange={(e) => {
-              setCurrentTimeIndex(parseInt(e.target.value))
-              setPlaying(false) // Pause when scrubbing
-            }}
-          />
-        </div>
+         <div>
+           <button onClick={() => setPlaying(!playing)}>{playing ? 'Pause' : 'Play'}</button>
+           <label htmlFor="speed-select">Speed:</label>
+           <select id="speed-select" value={speed} onChange={(e) => setSpeed(parseFloat(e.target.value))}>
+             <option value={0.25}>0.25x</option>
+             <option value={0.5}>0.5x</option>
+             <option value={1}>1x</option>
+             <option value={2}>2x</option>
+             <option value={4}>4x</option>
+           </select>
+           <label htmlFor="time-scrub">Time: {scenario.time[currentTimeIndex]?.toFixed(2)}</label>
+           <input
+             id="time-scrub"
+             type="range"
+             min={0}
+             max={scenario.time.length - 1}
+             value={currentTimeIndex}
+             onChange={(e) => {
+               setCurrentTimeIndex(parseInt(e.target.value))
+               setPlaying(false) // Pause when scrubbing
+             }}
+           />
+         </div>
         <p>Current time index: {currentTimeIndex}</p>
       </div>
     </div>

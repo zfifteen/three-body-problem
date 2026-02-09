@@ -24,12 +24,12 @@ export function SpatialView({ scenario, currentTimeIndex }: SpatialViewProps) {
       const scene = new THREE.Scene()
       sceneRef.current = scene
 
-      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / 2 / window.innerHeight, 0.1, 1000)
+      const camera = new THREE.PerspectiveCamera(75, mountRef.current.clientWidth / mountRef.current.clientHeight, 0.1, 1000)
       cameraRef.current = camera
 
       const renderer = new THREE.WebGLRenderer()
       rendererRef.current = renderer
-      renderer.setSize(window.innerWidth / 2, window.innerHeight / 2)
+      renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight)
       mountRef.current.appendChild(renderer.domElement)
 
       // Add lights
@@ -111,7 +111,7 @@ export function SpatialView({ scenario, currentTimeIndex }: SpatialViewProps) {
   }, [scenario, currentTimeIndex])
 
   return (
-    <div style={{ position: 'relative', width: '50%', height: '50%' }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <div ref={mountRef} style={{ width: '100%', height: '100%' }} />
       <div style={{ position: 'absolute', top: 10, left: 10, color: 'white', background: 'rgba(0,0,0,0.5)', padding: '5px' }}>
         t = {scenario.time[currentTimeIndex]?.toFixed(2)}
