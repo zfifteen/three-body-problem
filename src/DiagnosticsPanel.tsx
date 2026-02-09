@@ -31,6 +31,8 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       mode: 'lines',
       name: 'Z',
       line: { color: 'red' },
+      xaxis: 'x',
+      yaxis: 'y',
     },
     {
       x: time,
@@ -39,6 +41,8 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       mode: 'lines',
       name: 'dI/dt',
       line: { color: 'blue' },
+      xaxis: 'x',
+      yaxis: 'y2',
     },
     {
       x: time,
@@ -47,6 +51,8 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       mode: 'lines',
       name: 'D_min',
       line: { color: 'green' },
+      xaxis: 'x',
+      yaxis: 'y3',
     },
     {
       x: time,
@@ -55,6 +61,8 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       mode: 'lines',
       name: 'V_max',
       line: { color: 'orange' },
+      xaxis: 'x',
+      yaxis: 'y4',
     },
     // First crossing markers
     {
@@ -65,6 +73,8 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       name: 'Z crossing',
       marker: { color: 'red', symbol: 'star', size: 10 },
       hovertemplate: `Z first crosses at t=${scenario.firstCrossingTimes.Z.toFixed(2)}<br>Threshold: ${scenario.thresholds.Z.toFixed(2)}<br>Lead time: ${leadTimes.Z}%<extra></extra>`,
+      xaxis: 'x',
+      yaxis: 'y',
     },
     {
       x: [scenario.firstCrossingTimes.dIdt],
@@ -74,6 +84,8 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       name: 'dI/dt crossing',
       marker: { color: 'blue', symbol: 'diamond', size: 10 },
       hovertemplate: `dI/dt first crosses at t=${scenario.firstCrossingTimes.dIdt.toFixed(2)}<br>Threshold: ${scenario.thresholds.dIdt.toFixed(2)}<br>Lead time: ${leadTimes.dIdt}%<extra></extra>`,
+      xaxis: 'x',
+      yaxis: 'y2',
     },
     {
       x: [scenario.firstCrossingTimes.Dmin],
@@ -83,6 +95,8 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       name: 'D_min crossing',
       marker: { color: 'green', symbol: 'triangle-up', size: 10 },
       hovertemplate: `D_min first crosses at t=${scenario.firstCrossingTimes.Dmin.toFixed(2)}<br>Threshold: ${scenario.thresholds.Dmin.toFixed(2)}<br>Lead time: ${leadTimes.Dmin}%<extra></extra>`,
+      xaxis: 'x',
+      yaxis: 'y3',
     },
     {
       x: [scenario.firstCrossingTimes.Vmax],
@@ -92,6 +106,8 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       name: 'V_max crossing',
       marker: { color: 'orange', symbol: 'square', size: 10 },
       hovertemplate: `V_max first crosses at t=${scenario.firstCrossingTimes.Vmax.toFixed(2)}<br>Threshold: ${scenario.thresholds.Vmax.toFixed(2)}<br>Lead time: ${leadTimes.Vmax}%<extra></extra>`,
+      xaxis: 'x',
+      yaxis: 'y4',
     },
   ];
 
@@ -115,6 +131,8 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       y0: scenario.thresholds.Z,
       y1: scenario.thresholds.Z,
       line: { color: 'red', dash: 'dash' },
+      xref: 'x',
+      yref: 'y',
     },
     {
       type: 'line',
@@ -123,6 +141,8 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       y0: scenario.thresholds.dIdt,
       y1: scenario.thresholds.dIdt,
       line: { color: 'blue', dash: 'dash' },
+      xref: 'x',
+      yref: 'y2',
     },
     {
       type: 'line',
@@ -131,6 +151,8 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       y0: scenario.thresholds.Dmin,
       y1: scenario.thresholds.Dmin,
       line: { color: 'green', dash: 'dash' },
+      xref: 'x',
+      yref: 'y3',
     },
     {
       type: 'line',
@@ -139,6 +161,8 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
       y0: scenario.thresholds.Vmax,
       y1: scenario.thresholds.Vmax,
       line: { color: 'orange', dash: 'dash' },
+      xref: 'x',
+      yref: 'y4',
     },
     // Ejection line
     {
@@ -155,8 +179,11 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
 
   const layout: Partial<Plotly.Layout> = {
     title: { text: 'Diagnostics' },
-    xaxis: { title: { text: 'Time' } },
-    yaxis: { title: { text: 'Value' } },
+    xaxis: { title: { text: 'Time' }, domain: [0, 1] },
+    yaxis: { title: { text: 'Z' }, domain: [0.75, 1] },
+    yaxis2: { title: { text: 'dI/dt' }, domain: [0.5, 0.75] },
+    yaxis3: { title: { text: 'D_min' }, domain: [0.25, 0.5] },
+    yaxis4: { title: { text: 'V_max' }, domain: [0, 0.25] },
     shapes,
     annotations: [
       {
@@ -169,7 +196,12 @@ export function DiagnosticsPanel({ scenario, currentTimeIndex }: DiagnosticsPane
         font: { color: 'black', size: 12 },
       },
     ],
-    height: 400,
+    height: 600,
+    grid: {
+      rows: 4,
+      columns: 1,
+      pattern: 'independent',
+    },
   };
 
   return <Plot data={data} layout={layout} />;
