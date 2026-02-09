@@ -30,4 +30,9 @@ export const scenarios: ScenarioOption[] = [
     name: 'Long-lived hierarchical control (non-ejecting)',
     file: 'long-lived-hierarchical.json',
   },
+  {
+    id: 'binary-formation',
+    name: 'Binary formation showcase',
+    file: 'binary-formation.json',
+  },
 ];
