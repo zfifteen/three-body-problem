@@ -4,7 +4,6 @@ module.exports = {
   extends: [
     'eslint:recommended',
     '@typescript-eslint/recommended',
-    'eslint:recommended',
     '@typescript-eslint/recommended-type-checked',
     'plugin:react-hooks/recommended',
   ],
@@ -15,7 +14,7 @@ module.exports = {
     sourceType: 'module',
     project: ['./tsconfig.json', './tsconfig.node.json'],
   },
-  plugins: ['react-refresh'],
+  plugins: ['react-refresh', '@typescript-eslint'],
   rules: {
     'react-refresh/only-export-components': [
       'warn',
