@@ -21,65 +21,75 @@ export function SpatialView({ scenario, currentTimeIndex, viewMode }: SpatialVie
     if (!mountRef.current) return
 
     // Initialize scene once
-    if (!sceneRef.current) {
-      const scene = new THREE.Scene()
-      sceneRef.current = scene
+    const scene = new THREE.Scene()
+    sceneRef.current = scene
 
-      const camera = new THREE.PerspectiveCamera(75, mountRef.current.clientWidth / mountRef.current.clientHeight, 0.1, 1000)
-      cameraRef.current = camera
+    const camera = new THREE.PerspectiveCamera(75, mountRef.current.clientWidth / mountRef.current.clientHeight, 0.1, 1000)
+    cameraRef.current = camera
 
-      const renderer = new THREE.WebGLRenderer()
-      rendererRef.current = renderer
-      renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight)
-      mountRef.current.appendChild(renderer.domElement)
+    const renderer = new THREE.WebGLRenderer()
+    rendererRef.current = renderer
+    renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight)
+    mountRef.current.appendChild(renderer.domElement)
 
-      // Add lights
-      const ambientLight = new THREE.AmbientLight(0x404040)
-      scene.add(ambientLight)
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
-      directionalLight.position.set(1, 1, 1)
-      scene.add(directionalLight)
+    // Add lights
+    const ambientLight = new THREE.AmbientLight(0x404040)
+    scene.add(ambientLight)
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
+    directionalLight.position.set(1, 1, 1)
+    scene.add(directionalLight)
 
-      // Add bodies
-      const bodies: THREE.Mesh[] = []
-      const colors = [0xff0000, 0x00ff00, 0x0000ff] // Red, green, blue
+    // Add bodies
+    const bodies: THREE.Mesh[] = []
+    const colors = [0xff0000, 0x00ff00, 0x0000ff] // Red, green, blue
 
-      for (let i = 0; i < 3; i++) {
-        const geometry = new THREE.SphereGeometry(0.1, 32, 32)
-        const material = new THREE.MeshLambertMaterial({ color: colors[i] })
-        const sphere = new THREE.Mesh(geometry, material)
-        bodies.push(sphere)
-        scene.add(sphere)
-      }
-      bodiesRef.current = bodies
-
-      // Add orbit trails
-      const trails: THREE.Line[] = []
-      for (let i = 0; i < 3; i++) {
-        const geometry = new THREE.BufferGeometry()
-        const material = new THREE.LineBasicMaterial({ color: colors[i], transparent: true, opacity: 0.7 })
-        const line = new THREE.Line(geometry, material)
-        trails.push(line)
-        scene.add(line)
-      }
-      trailsRef.current = trails
-
-      camera.position.z = 5
-
-      // Add orbit controls
-      const controls = new OrbitControls(camera, renderer.domElement)
-      controls.enableDamping = true
-      controls.dampingFactor = 0.05
-
-      const animate = () => {
-        requestAnimationFrame(animate)
-        controls.update()
-        if (rendererRef.current && sceneRef.current && cameraRef.current) {
-          rendererRef.current.render(sceneRef.current, cameraRef.current)
-        }
-      }
-      animate()
+    for (let i = 0; i < 3; i++) {
+      const geometry = new THREE.SphereGeometry(0.1, 32, 32)
+      const material = new THREE.MeshLambertMaterial({ color: colors[i] })
+      const sphere = new THREE.Mesh(geometry, material)
+      bodies.push(sphere)
+      scene.add(sphere)
     }
+    bodiesRef.current = bodies
+
+    // Add orbit trails
+    const trails: THREE.Line[] = []
+    for (let i = 0; i < 3; i++) {
+      const geometry = new THREE.BufferGeometry()
+      const material = new THREE.LineBasicMaterial({ color: colors[i], transparent: true, opacity: 0.7 })
+      const line = new THREE.Line(geometry, material)
+      trails.push(line)
+      scene.add(line)
+    }
+    trailsRef.current = trails
+
+    camera.position.z = 5
+
+    // Add orbit controls
+    const controls = new OrbitControls(camera, renderer.domElement)
+    controls.enableDamping = true
+    controls.dampingFactor = 0.05
+
+    const animate = () => {
+      requestAnimationFrame(animate)
+      controls.update()
+      if (rendererRef.current && sceneRef.current && cameraRef.current) {
+        rendererRef.current.render(sceneRef.current, cameraRef.current)
+      }
+    }
+    animate()
+
+    return () => {
+      // Cleanup on unmount
+      if (rendererRef.current && mountRef.current && mountRef.current.contains(rendererRef.current.domElement)) {
+        mountRef.current.removeChild(rendererRef.current.domElement)
+        rendererRef.current.dispose()
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!sceneRef.current || !bodiesRef.current || !trailsRef.current) return
 
     // Update trails up to current time
     const trails = trailsRef.current
@@ -115,14 +125,6 @@ export function SpatialView({ scenario, currentTimeIndex, viewMode }: SpatialVie
         bodiesRef.current.forEach((body, i) => {
           body.position.set(positions[i][0] - cm[0], positions[i][1] - cm[1], positions[i][2] - cm[2])
         })
-      }
-    }
-
-    return () => {
-      // Cleanup on unmount
-      if (rendererRef.current && mountRef.current && mountRef.current.contains(rendererRef.current.domElement)) {
-        mountRef.current.removeChild(rendererRef.current.domElement)
-        rendererRef.current.dispose()
       }
     }
   }, [scenario, currentTimeIndex, viewMode])
